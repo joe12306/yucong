@@ -164,6 +164,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             } else if (xmlPullParser.getName().equals("pm25")) {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setPm25(xmlPullParser.getText());
+                                todayWeather.setPmImg(pm25show(xmlPullParser.getText()));
                             } else if (xmlPullParser.getName().equals("quality")) {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setQuality(xmlPullParser.getText());
@@ -190,6 +191,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                             } else if (xmlPullParser.getName().equals("type") && typeCount == 0) {
                                 eventType = xmlPullParser.next();
                                 todayWeather.setType(xmlPullParser.getText());
+                                todayWeather.setWeatherImg(weathershow(xmlPullParser.getText()));
                                 typeCount++;
                             }
                         }
@@ -231,6 +233,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv.setText("N/A");
         windTv.setText("N/A");
         temperature_now_Tv.setText("N/A");
+        pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
+        weatherImg.setImageResource(R.drawable.biz_plugin_weather_qing);
     }
     void updateTodayWeather(TodayWeather todayWeather){
         city_name_Tv.setText(todayWeather.getCity()+"天气");
@@ -244,7 +248,78 @@ public class MainActivity extends Activity implements View.OnClickListener {
         climateTv.setText(todayWeather.getType());
         windTv.setText("风力:"+todayWeather.getFengli());
         temperature_now_Tv.setText(todayWeather.getWendu()+"℃");
+        pmImg.setImageResource(todayWeather.getPmImg());
+        weatherImg.setImageResource(todayWeather.getWeatherImg());
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
     }
+    int pm25show(String pm25)
+    {
+        int pm_25=Integer.parseInt(pm25);
+        if(pm_25>=0&&pm_25<=50){
+            return R.drawable.biz_plugin_weather_0_50;
+        }
+        if(pm_25>=51&&pm_25<=100){
+            return R.drawable.biz_plugin_weather_51_100;
+        }
+        if(pm_25>=101&&pm_25<=150){
+            return R.drawable.biz_plugin_weather_101_150;
+        }
+        if(pm_25>=151&&pm_25<=200){
+            return R.drawable.biz_plugin_weather_151_200;
+        }
+        if(pm_25>=201&&pm_25<=300){
+            return R.drawable.biz_plugin_weather_201_300;
+        }
+        if(pm_25>300){
+            return R.drawable.biz_plugin_weather_greater_300;
+        }
+        return R.drawable.biz_plugin_weather_0_50;
+
+    }
+    int weathershow(String type)
+    {
+        if(type.equals("暴雪"))
+            return R.drawable.biz_plugin_weather_baoxue;
+        if(type.equals("暴雨"))
+            return R.drawable.biz_plugin_weather_baoyu;
+        if(type.equals("大暴雨"))
+            return R.drawable.biz_plugin_weather_dabaoyu;
+        if(type.equals("大雪"))
+            return R.drawable.biz_plugin_weather_daxue;
+        if(type.equals("大雨"))
+            return R.drawable.biz_plugin_weather_dayu;
+        if(type.equals("多云"))
+            return R.drawable.biz_plugin_weather_duoyun;
+        if(type.equals("雷阵雨"))
+            return R.drawable.biz_plugin_weather_leizhenyu;
+        if(type.equals("雷阵雨冰雹"))
+            return R.drawable.biz_plugin_weather_leizhenyubingbao;
+        if(type.equals("晴"))
+            return R.drawable.biz_plugin_weather_qing;
+        if(type.equals("沙尘暴"))
+            return R.drawable.biz_plugin_weather_shachenbao;
+        if(type.equals("特大暴雨"))
+            return R.drawable.biz_plugin_weather_tedabaoyu;
+        if(type.equals("雾"))
+            return R.drawable.biz_plugin_weather_wu;
+        if(type.equals("小雪"))
+            return R.drawable.biz_plugin_weather_xiaoxue;
+        if(type.equals("小雨"))
+            return R.drawable.biz_plugin_weather_xiaoyu;
+        if(type.equals("阴"))
+            return R.drawable.biz_plugin_weather_yin;
+        if(type.equals("雨夹雪"))
+            return R.drawable.biz_plugin_weather_yujiaxue;
+        if(type.equals("阵雪"))
+            return R.drawable.biz_plugin_weather_zhenxue;
+        if(type.equals("阵雨"))
+            return R.drawable.biz_plugin_weather_zhenyu;
+        if(type.equals("中雪"))
+            return R.drawable.biz_plugin_weather_zhongxue;
+        if(type.equals("中雨"))
+            return R.drawable.biz_plugin_weather_zhongyu;
+        return R.drawable.biz_plugin_weather_qing;
+    }
+
 }
 

@@ -1,5 +1,6 @@
 package cn.edu.pku.zhangqixun.bean;
 
+import android.media.Image;
 import android.util.Log;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -25,6 +26,26 @@ public class TodayWeather {
     private String high;
     private String low;
     private String type;
+    private int pmImg;
+    private int weatherImg;
+
+    public int getWeatherImg() {
+        return weatherImg;
+    }
+
+    public void setWeatherImg(int weatherImg) {
+        this.weatherImg = weatherImg;
+    }
+
+
+    public int getPmImg() {
+        return pmImg;
+    }
+
+    public void setPmImg(int pmImg) {
+        this.pmImg = pmImg;
+    }
+
 
     public String getWendu() {
         return wendu;
@@ -137,6 +158,8 @@ public class TodayWeather {
                 ", high='" + high + '\'' +
                 ", low='" + low + '\'' +
                 ", type='" + type + '\'' +
+                ", pmImg=" + pmImg +
+                ", weatherImg=" + weatherImg +
                 '}';
     }
 }
