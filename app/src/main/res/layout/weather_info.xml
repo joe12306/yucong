@@ -63,7 +63,8 @@
         android:layout_height="fill_parent"
         android:layout_below="@id/title"
         android:background="@drawable/biz_plugin_weather_shenzhen_bg"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:weightSum="1">
         <RelativeLayout
             android:id="@+id/weather_today"
             android:layout_width="fill_parent"
@@ -171,7 +172,7 @@
                     android:layout_alignParentLeft="true"
                     android:src="@drawable/biz_plugin_weather_qing"/>
                 <TextView
-                    android:id="@+id/week_totay"
+                    android:id="@+id/week_today"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentTop="true"
@@ -185,7 +186,7 @@
                     android:id="@+id/temperature"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/week_totay"
+                    android:layout_below="@id/week_today"
                     android:layout_marginLeft="5.0dip"
                     android:layout_toRightOf="@+id/weather_img"
                     android:singleLine="true"
@@ -220,8 +221,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/pm2_5_quality"
-                    android:layout_marginTop="60.0dip"
-                    android:layout_marginLeft="1.0dip"
+                    android:layout_marginTop="50.0dip"
                     android:layout_alignParentRight="true"
                     android:singleLine="true"
                     android:text="-5℃"
@@ -229,5 +229,7 @@
                     android:textSize="45.0sp"/>
         </RelativeLayout>
         </RelativeLayout>
-</LinearLayout>
+
+    </LinearLayout>
+
 </RelativeLayout>
