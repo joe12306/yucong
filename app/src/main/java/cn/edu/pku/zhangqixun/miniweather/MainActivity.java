@@ -1,17 +1,16 @@
 package cn.edu.pku.zhangqixun.miniweather;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
-import android.widget.ShareActionProvider;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,9 +38,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView mUpdateBtn;
     private ImageView mCitySelect;
     private TextView cityTv,timeTv,humidityTv,weekTv,pmDataTv,pmQualityTv,temperatureTv,climateTv,windTv,city_name_Tv,temperature_now_Tv;
-    private ImageView weatherImg,pmImg;
+    private ImageView pmImg;
+    private ImageView weatherImg;
+    private int weatherImg_id;
+    private int pmImg_id;
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
+
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
                     updateTodayWeather((TodayWeather) msg.obj);
@@ -55,6 +58,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d("myWeather","main_activity create");
         setContentView(R.layout.weather_info);
 
         mUpdateBtn = (ImageView) findViewById(R.id.title_upadte_btn);
@@ -69,7 +73,71 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         mCitySelect=(ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
-        initView();
+        initView(savedInstanceState);
+
+
+    }
+    public void set_wDrawable(int id)
+    {
+        weatherImg_id=id;
+    }
+    public int get_wDrawable(){
+        return weatherImg_id;
+    }
+    public void set_pDrawable(int id)
+    {
+        pmImg_id=id;
+    }
+    public int get_pDrawable(){
+        return pmImg_id;
+    }
+   protected void onSaveInstanceState(Bundle outState){
+       Log.d("myWeather","onSaveInstanceState");
+       outState.putInt("current_w",this.get_wDrawable());
+       outState.putInt("current_p",this.get_pDrawable());
+       outState.putCharSequence("current_wendu",temperature_now_Tv.getText());
+       outState.putCharSequence("current_wind",windTv.getText());
+       outState.putCharSequence("current_htol",temperatureTv.getText());
+       outState.putCharSequence("current_week",weekTv.getText());
+       outState.putCharSequence("current_pmQuality",pmQualityTv.getText());
+       outState.putCharSequence("current_pmData",pmDataTv.getText());
+       outState.putCharSequence("current_humidity",humidityTv.getText());
+       outState.putCharSequence("current_time",timeTv.getText());
+       outState.putCharSequence("current_city",cityTv.getText());
+       outState.putCharSequence("current_city_name",city_name_Tv.getText());
+       outState.putCharSequence("current_climate",climateTv.getText());
+       super.onSaveInstanceState(outState);
+    }
+    protected void onRestart()
+    {
+        super.onRestart();
+        Log.d("myWeather","main_activity restart");
+    }
+    protected void onStart() {
+        super.onStart();
+        Log.d("myWeather","main_activity start");
+    }
+
+    protected void onResume()
+    {
+        super.onResume();
+        Log.d("myWeather","main_activity resume");
+    }
+    protected void onPause()
+    {
+        super.onPause();
+
+        Log.d("myWeather","main_activity pause");
+    }
+    protected void onStop()
+    {
+        super.onStop();
+        Log.d("myWeather","main_activity stop");
+    }
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        Log.d("myWeather","main_activity destroy");
     }
 
     public void onClick(View view) {
@@ -79,6 +147,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
             startActivity(i);
         }
         if (view.getId() == R.id.title_upadte_btn) {
+            final ProgressDialog dialog=new ProgressDialog(this);
+            dialog.setTitle("正在更新");
+            dialog.setMessage("请等待...");
+            dialog.show();
+            new Thread(){
+                @Override
+                public void run() {
+                    super.run();
+                    for(int i=0;i<=100;i++){
+                        dialog.setProgress(i);
+
+                        SystemClock.sleep(3);
+                    }
+                    dialog.dismiss();
+                };
+            }.start();
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code", "101010100");
             Log.d("myWeather", cityCode);
@@ -154,8 +238,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     case XmlPullParser.START_DOCUMENT:
                         break;
                     case XmlPullParser.START_TAG:
-                        if(xmlPullParser.getName().equals("resp"
-                        )){
+                        if(xmlPullParser.getName().equals("resp")){
                             todayWeather= new TodayWeather();
                         }
                         if (todayWeather != null) {
@@ -218,7 +301,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         return todayWeather;
     }
-    void initView(){
+    void initView(Bundle savedInstanceState){
         city_name_Tv = (TextView) findViewById(R.id.title_city_name);
         cityTv = (TextView) findViewById(R.id.city);
         timeTv = (TextView) findViewById(R.id.time);
@@ -232,19 +315,89 @@ public class MainActivity extends Activity implements View.OnClickListener {
         windTv = (TextView) findViewById(R.id.wind);
         temperature_now_Tv=(TextView) findViewById(R.id.temperature_now);
         weatherImg = (ImageView) findViewById(R.id.weather_img);
-        city_name_Tv.setText("N/A");
-        cityTv.setText("N/A");
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_city_name")!=null)
+        {
+            city_name_Tv.setText(savedInstanceState.getCharSequence("current_city_name"));
+        }else{
+            city_name_Tv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_city")!=null)
+        {
+            cityTv.setText(savedInstanceState.getCharSequence("current_city"));
+        }else{
+            cityTv.setText("N/A");
+        }
         timeTv.setText("N/A");
-        humidityTv.setText("N/A");
-        pmDataTv.setText("N/A");
-        pmQualityTv.setText("N/A");
-        weekTv.setText("N/A");
-        temperatureTv.setText("N/A");
-        climateTv.setText("N/A");
-        windTv.setText("N/A");
-        temperature_now_Tv.setText("N/A");
-        pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_time")!=null)
+        {
+            timeTv.setText(savedInstanceState.getCharSequence("current_time"));
+        }else{
+            timeTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_humidity")!=null)
+        {
+            humidityTv.setText(savedInstanceState.getCharSequence("current_humidity"));
+        }else{
+            humidityTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_pmData")!=null)
+        {
+            pmDataTv.setText(savedInstanceState.getCharSequence("current_pmData"));
+        }else{
+            pmDataTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_pmQuality")!=null)
+        {
+            pmQualityTv.setText(savedInstanceState.getCharSequence("current_pmQuality"));
+        }else{
+            pmQualityTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_week")!=null)
+        {
+            weekTv.setText(savedInstanceState.getCharSequence("current_week"));
+        }else{
+            weekTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_htol")!=null)
+        {
+            temperatureTv.setText(savedInstanceState.getCharSequence("current_htol"));
+        }else{
+            temperatureTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_climate")!=null)
+        {
+            climateTv.setText(savedInstanceState.getCharSequence("current_climate"));
+        }else{
+            climateTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_wind")!=null)
+        {
+            windTv.setText(savedInstanceState.getCharSequence("current_wind"));
+        }else{
+            windTv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getCharSequence("current_wendu")!=null)
+        {
+            temperature_now_Tv.setText(savedInstanceState.getCharSequence("current_wendu"));
+        }else{
+            temperature_now_Tv.setText("N/A");
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getInt("current_p")!=0)
+        {
+            pmImg.setImageResource(savedInstanceState.getInt("current_p"));
+            this.set_pDrawable(savedInstanceState.getInt("current_p"));
+        }else{
+            pmImg.setImageResource(R.drawable.biz_plugin_weather_0_50);
+            this.set_pDrawable(R.drawable.biz_plugin_weather_0_50);
+        }
+        if(savedInstanceState!=null&&savedInstanceState.getInt("current_w")!=0)
+        {
+            weatherImg.setImageResource(savedInstanceState.getInt("current_w"));
+           this.set_wDrawable(savedInstanceState.getInt("current_w"));
+        }else{
         weatherImg.setImageResource(R.drawable.biz_plugin_weather_qing);
+            this.set_wDrawable(R.drawable.biz_plugin_weather_qing);
+        }
     }
     void updateTodayWeather(TodayWeather todayWeather){
         city_name_Tv.setText(todayWeather.getCity()+"天气");
@@ -259,7 +412,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
         windTv.setText("风力:"+todayWeather.getFengli());
         temperature_now_Tv.setText(todayWeather.getWendu()+"℃");
         pmImg.setImageResource(todayWeather.getPmImg());
+        this.set_pDrawable(todayWeather.getPmImg());
         weatherImg.setImageResource(todayWeather.getWeatherImg());
+        this.set_wDrawable(todayWeather.getWeatherImg());
         Toast.makeText(MainActivity.this,"更新成功！",Toast.LENGTH_SHORT).show();
     }
     int pm25show(String pm25)
@@ -332,4 +487,3 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
 }
-

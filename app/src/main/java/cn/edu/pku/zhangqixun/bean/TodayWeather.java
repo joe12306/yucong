@@ -13,7 +13,7 @@ import java.io.StringReader;
 /**
  * Created by JOE on 2016/10/17.
  */
-public class TodayWeather {
+ public class  TodayWeather {
     private String city;
     private String updatetime;
     private String wendu;
