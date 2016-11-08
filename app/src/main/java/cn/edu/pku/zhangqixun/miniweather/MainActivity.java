@@ -2,7 +2,10 @@ package cn.edu.pku.zhangqixun.miniweather;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
@@ -10,6 +13,7 @@ import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,8 +29,12 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 
+import cn.edu.pku.zhangqixun.app.MyApplication;
+import cn.edu.pku.zhangqixun.bean.City;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
 import cn.edu.pku.zhangqixun.util.NetUtil;
 
@@ -42,6 +50,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private ImageView weatherImg;
     private int weatherImg_id;
     private int pmImg_id;
+    private String address;
+    private MainReceiver Receiver=null;
     private Handler mHandler = new Handler() {
         public void handleMessage(android.os.Message msg) {
 
@@ -73,9 +83,21 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         mCitySelect=(ImageView)findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
-        initView(savedInstanceState);
 
 
+           //Log.d("myWeather",getIntent().getStringExtra("city_name"));
+          /* Intent intent=getIntent();//getIntent将该项目中包含的原始intent检索出来，将检索出来的intent赋值给一个Intent类型的变量intent
+           Bundle bundle=intent.getExtras();//.getExtras()得到intent所附带的额外数据
+       String city_name=bundle.getString("city_name");//getString()返回指定key的值
+            queryWeatherCode(city_name);*/
+           initView(savedInstanceState);
+
+
+    }
+    public static class MainReceiver extends BroadcastReceiver{
+        public void onReceive(Context context,Intent intent){
+            Log.d("myWeather","MainReciver");
+        }
     }
     public void set_wDrawable(int id)
     {
@@ -115,6 +137,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
     protected void onStart() {
         super.onStart();
+        Receiver=new MainReceiver(){
+            public void onReceive(Context context,Intent intent){
+                String citycode=intent.getStringExtra("city_name");
+                queryWeatherCode(citycode);
+                Log.d("query","1");
+            }
+        };
+        IntentFilter intentFilter=new IntentFilter();
+        intentFilter.addAction("receive_city");
+        registerReceiver(Receiver,intentFilter);
         Log.d("myWeather","main_activity start");
     }
 
@@ -137,6 +169,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onDestroy()
     {
         super.onDestroy();
+        unregisterReceiver(Receiver);
         Log.d("myWeather","main_activity destroy");
     }
 
@@ -144,6 +177,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if(view.getId()==R.id.title_city_manager)
         {
             Intent i=new Intent(this,SelectCity.class);
+            i.putExtra("city_name",(String) cityTv.getText());
             startActivity(i);
         }
         if (view.getId() == R.id.title_upadte_btn) {
@@ -165,6 +199,24 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }.start();
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code", "101010100");
+            if((city_name_Tv.getText())!="N/A")
+            {   Log.d("myWeather","cccc");
+                Log.d("myWeather",(String)city_name_Tv.getText());
+                String city_name=(String) city_name_Tv.getText();
+                MyApplication app=(MyApplication)getApplication();
+                List<City> CityList=app.getCityList();
+       /* for (int i= 0;i<CityList.size();i++){
+            listViewData.add(CityList.get(i).getCity());
+        }*/
+                for (int i= 0;i<CityList.size();i++){
+                    if(city_name.equals(CityList.get(i).getCity()+"天气"))
+                    {
+                        cityCode=CityList.get(i).getNumber();
+                        break;
+
+                    }
+                }
+            }
             Log.d("myWeather", cityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
@@ -177,7 +229,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void queryWeatherCode(String cityCode) {
-        final String address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
+        address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
         new Thread(new Runnable() {
             @Override

@@ -18,6 +18,20 @@
         </activity>
         <activity android:name=".SelectCity">
         </activity>
+        <activity android:name=".oneCity">
+        </activity>
+        <receiver android:name=".SelectCity$Reciver">
+            <intent-filter>
+                <action android:name="receive_city">
+                </action>
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".MainActivity$MainReceiver">
+            <intent-filter>
+                <action android:name="receive_city">
+                </action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
