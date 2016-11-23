@@ -31,7 +31,7 @@
                 <action android:name="receive_city">
                 </action>
             </intent-filter>
-        </receiver>
+        </receiver><!-- ATTENTION: This was auto-generated to add Google Play services to your project for
+     App Indexing.  See https://g.co/AppIndexing/AndroidStudio for more information. -->
     </application>
-
 </manifest>
