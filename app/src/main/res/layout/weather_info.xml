@@ -57,6 +57,7 @@
             android:layout_toLeftOf="@id/title_share"
             android:src="@drawable/base_action_bar_action_city"/>
     </RelativeLayout>
+
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -69,8 +70,7 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:padding="10.0dip">
-
-        <TextView
+            <TextView
             android:id="@+id/city"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

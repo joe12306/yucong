@@ -94,8 +94,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
         mCitySelect = (ImageView) findViewById(R.id.title_city_manager);
         mCitySelect.setOnClickListener(this);
-
-
         //Log.d("myWeather",getIntent().getStringExtra("city_name"));
           /* Intent intent=getIntent();//getIntent将该项目中包含的原始intent检索出来，将检索出来的intent赋值给一个Intent类型的变量intent
            Bundle bundle=intent.getExtras();//.getExtras()得到intent所附带的额外数据
@@ -189,7 +187,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     public void onClick(View view) {
         if (view.getId() == R.id.title_city_manager) {
-            Intent i = new Intent(this, SelectCity.class);
+            Intent i = new Intent(this, oneCity.class);
             i.putExtra("city_name", (String) cityTv.getText());
             startActivity(i);
         }
