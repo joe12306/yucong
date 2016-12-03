@@ -10,15 +10,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".oneCity">
+        <activity android:name=".oneCity"
+                  android:screenOrientation="portrait">
         </activity>
-        <receiver android:name=".MainActivity$MainReceiver">
+        <activity android:name=".Guide"
+            android:screenOrientation="portrait">
+        </activity>
+        <activity android:name=".weather"></activity>
+        <receiver android:name=".weather$MainReceiver">
             <intent-filter>
                 <action android:name="receive_city">
                 </action>
