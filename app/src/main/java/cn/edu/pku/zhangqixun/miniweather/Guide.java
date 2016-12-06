@@ -64,15 +64,18 @@ public class Guide extends Activity implements View.OnClickListener ,ViewPager.O
     PagerAdapter pagerAdapter = new PagerAdapter() {
         @Override
         public boolean isViewFromObject(View arg0, Object arg1) {
+           // Log.d("mypagerAdapter","isViewFromObject");
             return arg0 == arg1;
         }
         @Override
         public int getCount() {
+            //Log.d("mypagerAdapter","the sum of pager : "+String.valueOf(viewList.size()));
             return viewList.size();
         }
 
         @Override
         public void destroyItem(ViewGroup container, int position, Object object) {
+            Log.d("mypagerAdapter","destroyItem page"+position);
             ((ViewPager) container).removeView(viewList.get(position));
         }
         public Parcelable saveState(){
@@ -85,6 +88,7 @@ public class Guide extends Activity implements View.OnClickListener ,ViewPager.O
                 mEnter = (ImageView)findViewById(R.id.open_image);
                 mEnter.setOnClickListener(Guide.this);
             }
+            Log.d("mypagerAdapter","page: "+position);
             return viewList.get(position);
         }
     };
