@@ -2,14 +2,20 @@ package cn.edu.pku.zhangqixun.miniweather;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.location.Location;
+import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
 import android.os.SystemClock;
 import android.support.v4.view.PagerAdapter;
@@ -25,10 +31,6 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.appindexing.Action;
-import com.google.android.gms.appindexing.AppIndex;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -50,45 +52,118 @@ import cn.edu.pku.zhangqixun.bean.AfterWeather;
 import cn.edu.pku.zhangqixun.bean.City;
 import cn.edu.pku.zhangqixun.bean.TodayWeather;
 import cn.edu.pku.zhangqixun.util.NetUtil;
+import layout.WeatherWidget;
+//import com.baidu.location.BDLocation;
+//import com.baidu.location.BDLocationListener;
+//import com.baidu.location.LocationClient;
+//import com.baidu.location.LocationClientOption;
+//import com.baidu.location.BDNotifyListener;//假如用到位置提醒功能，需要import该类
+//import com.baidu.location.Poi;
 
 /**
  * Created by JOE on 2016/9/23.
  */
 public class weather extends Activity implements View.OnClickListener {
+    //    public LocationClient mLocationClient = null;
+//    private LocationManager locationManager;
+//    private String provider;
+//    public BDLocationListener myListener = new MyLocationListener();
     private static final int UPDATE_TODAY_WEATHER = 1;
-    private static final int UPDATE_AFTER_WEATHER=2;
+    private static final int UPDATE_AFTER_WEATHER = 2;
     private ImageView mUpdateBtn;
     private ImageView mCitySelect;
     private TextView cityTv, timeTv, humidityTv, weekTv, pmDataTv, pmQualityTv, temperatureTv, climateTv, windTv, city_name_Tv, temperature_now_Tv;
     private ImageView pmImg;
     private ImageView weatherImg;
-    private TextView[] climate_afterTv=new TextView[3];
-    private TextView[] time_afterTv=new TextView[3];
-    private TextView[] temperature_afterTv=new TextView[3];
-    private ImageView[] weather_afterImg=new ImageView[3];
+    private TextView[] climate_afterTv = new TextView[3];
+    private TextView[] time_afterTv = new TextView[3];
+    private TextView[] temperature_afterTv = new TextView[3];
+    private ImageView[] weather_afterImg = new ImageView[3];
     private int weatherImg_id;
     private int pmImg_id;
     private String address;
     private MainReceiver Receiver = null;
-    private  Animation  rotate;
+    private Animation rotate;
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
                 case UPDATE_TODAY_WEATHER:
-                    if(rotate!=null)
+                    if (rotate != null)
                         mUpdateBtn.clearAnimation();
                     updateTodayWeather((TodayWeather) msg.obj);
+                    Intent i=new Intent("android.appwidget.action.APPWIDGET_UPDATE");
+                    i.putExtra("climate",climateTv.getText());
+                    i.putExtra("temperature_now",temperature_now_Tv.getText());
+                    i.putExtra("city",cityTv.getText());
+                    sendBroadcast(i);
                     break;
                 case UPDATE_AFTER_WEATHER:
-                    updateAfterWeather((AfterWeatherlist)msg.obj);
+                    updateAfterWeather((AfterWeatherlist) msg.obj);
 
                 default:
                     break;
             }
         }
     };
-
+//    private MyReceiver myReciver = new MyReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//            if ("update".equals(intent.getAction())) {
+//                String cityCode = "101010100";
+//                if ((city_name_Tv.getText()) != "N/A") {
+//                    Log.d("myWeather", "cccc");
+//                    Log.d("myWeather", (String) city_name_Tv.getText());
+//                    String city_name = (String) city_name_Tv.getText();
+//                    MyApplication app = (MyApplication) getApplication();
+//                    List<City> CityList = app.getCityList();
+//       /* for (int i= 0;i<CityList.size();i++){
+//            listViewData.add(CityList.get(i).getCity());
+//        }*/
+//                    for (int i = 0; i < CityList.size(); i++) {
+//                        if (city_name.equals(CityList.get(i).getCity() + "天气")) {
+//                            cityCode = CityList.get(i).getNumber();
+//                            break;
+//
+//                        }
+//                    }
+//                }
+//                queryWeatherCode(cityCode);
+//                queryAfterWeather(cityCode);
+//
+//            }
+//        }
+//    };
+//        public class MyReceiver extends BroadcastReceiver {
+//            public void onReceive(Context context, Intent intent) {
+//                Log.d("MyRecieve",intent.getStringExtra("key"));
+////                String cityCode="101010100";
+////                queryWeatherCode(cityCode);
+////                if ("update".equals(intent.getAction())) {
+////                    String cityCode = "101010100";
+////                    if ((city_name_Tv.getText()) != "N/A") {
+////                        Log.d("myWeather", "cccc");
+////                        Log.d("myWeather", (String) city_name_Tv.getText());
+////                        String city_name = (String) city_name_Tv.getText();
+////                        MyApplication app = (MyApplication) getApplication();
+////                        List<City> CityList = app.getCityList();
+////       /* for (int i= 0;i<CityList.size();i++){
+////            listViewData.add(CityList.get(i).getCity());
+////        }*/
+////                        for (int i = 0; i < CityList.size(); i++) {
+////                            if (city_name.equals(CityList.get(i).getCity() + "天气")) {
+////                                cityCode = CityList.get(i).getNumber();
+////                                break;
+////
+////                            }
+////                        }
+////                    }
+////                    queryWeatherCode(cityCode);
+////                    queryAfterWeather(cityCode);
+////
+////                }
+//            }
+//        }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -114,8 +189,108 @@ public class weather extends Activity implements View.OnClickListener {
             queryWeatherCode(city_name);*/
         initView(savedInstanceState);
 
+
+//        try{
+//            mLocationClient = new LocationClient(getApplicationContext());
+//            initLocation();
+//            mLocationClient.start();
+//            if(mLocationClient!=null){
+//                BDLocation bdLocation=mLocationClient.getLastKnownLocation();
+//                String cityname=bdLocation.getAddrStr();
+//                Log.d("mycitycode",cityname);
+////                String citycode=mLocationClient.getLastKnownLocation().getCityCode();
+//            }
+//        } catch(Exception e){
+//            e.printStackTrace();}
+
+
+//        Log.d("mycitycode",citycode);
+
     }
 
+//    private void initLocation() {
+//        LocationClientOption option = new LocationClientOption();
+//        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy
+//        );//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
+//        option.setCoorType("bd09ll");//可选，默认gcj02，设置返回的定位结果坐标系
+//        int span = 1000;
+//        option.setScanSpan(span);//可选，默认0，即仅定位一次，设置发起定位请求的间隔需要大于等于1000ms才是有效的
+//        option.setIsNeedAddress(true);//可选，设置是否需要地址信息，默认不需要
+//        option.setOpenGps(true);//可选，默认false,设置是否使用gps
+//        option.setLocationNotify(true);//可选，默认false，设置是否当GPS有效时按照1S/1次频率输出GPS结果
+//        option.setIsNeedLocationDescribe(true);//可选，默认false，设置是否需要位置语义化结果，可以在BDLocation.getLocationDescribe里得到，结果类似于“在北京天安门附近”
+//        option.setIsNeedLocationPoiList(true);//可选，默认false，设置是否需要POI结果，可以在BDLocation.getPoiList里得到
+//        option.setIgnoreKillProcess(false);//可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop的时候杀死这个进程，默认不杀死
+//        option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
+//        option.setEnableSimulateGps(false);//可选，默认false，设置是否需要过滤GPS仿真结果，默认需要
+//        mLocationClient.setLocOption(option);
+//    }
+//
+//    public class MyLocationListener implements BDLocationListener {
+//
+//        @Override
+//        public void onReceiveLocation(BDLocation location) {
+//            //Receive Location
+//            StringBuffer sb = new StringBuffer(256);
+//            sb.append("time : ");
+//            sb.append(location.getTime());
+//            sb.append("\nerror code : ");
+//            sb.append(location.getLocType());
+//            sb.append("\nlatitude : ");
+//            sb.append(location.getLatitude());
+//            sb.append("\nlontitude : ");
+//            sb.append(location.getLongitude());
+//            sb.append("\nradius : ");
+//            sb.append(location.getRadius());
+//            if (location.getLocType() == BDLocation.TypeGpsLocation) {// GPS定位结果
+//                sb.append("\nspeed : ");
+//                sb.append(location.getSpeed());// 单位：公里每小时
+//                sb.append("\nsatellite : ");
+//                sb.append(location.getSatelliteNumber());
+//                sb.append("\nheight : ");
+//                sb.append(location.getAltitude());// 单位：米
+//                sb.append("\ndirection : ");
+//                sb.append(location.getDirection());// 单位度
+//                sb.append("\naddr : ");
+//                sb.append(location.getAddrStr());
+//                sb.append("\ndescribe : ");
+//                sb.append("gps定位成功");
+//
+//            } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {// 网络定位结果
+//                sb.append("\naddr : ");
+//                sb.append(location.getAddrStr());
+//                //运营商信息
+//                sb.append("\noperationers : ");
+//                sb.append(location.getOperators());
+//                sb.append("\ndescribe : ");
+//                sb.append("网络定位成功");
+//            } else if (location.getLocType() == BDLocation.TypeOffLineLocation) {// 离线定位结果
+//                sb.append("\ndescribe : ");
+//                sb.append("离线定位成功，离线定位结果也是有效的");
+//            } else if (location.getLocType() == BDLocation.TypeServerError) {
+//                sb.append("\ndescribe : ");
+//                sb.append("服务端网络定位失败，可以反馈IMEI号和大体定位时间到loc-bugs@baidu.com，会有人追查原因");
+//            } else if (location.getLocType() == BDLocation.TypeNetWorkException) {
+//                sb.append("\ndescribe : ");
+//                sb.append("网络不同导致定位失败，请检查网络是否通畅");
+//            } else if (location.getLocType() == BDLocation.TypeCriteriaException) {
+//                sb.append("\ndescribe : ");
+//                sb.append("无法获取有效定位依据导致定位失败，一般是由于手机的原因，处于飞行模式下一般会造成这种结果，可以试着重启手机");
+//            }
+//            sb.append("\nlocationdescribe : ");
+//            sb.append(location.getLocationDescribe());// 位置语义化信息
+//            List<Poi> list = location.getPoiList();// POI数据
+//            if (list != null) {
+//                sb.append("\npoilist size = : ");
+//                sb.append(list.size());
+//                for (Poi p : list) {
+//                    sb.append("\npoi= : ");
+//                    sb.append(p.getId() + " " + p.getName() + " " + p.getRank());
+//                }
+//            }
+//            Log.i("BaiduLocationApiDem", sb.toString());
+//        }
+//    }
 
 
     public static class MainReceiver extends BroadcastReceiver {
@@ -145,15 +320,15 @@ public class weather extends Activity implements View.OnClickListener {
         Log.d("myWeather", "onSaveInstanceState");
         outState.putInt("current_w", this.get_wDrawable());
         outState.putInt("current_p", this.get_pDrawable());
-        outState.putCharSequence("after_one_climate",climate_afterTv[0].getText());
-        outState.putCharSequence("after_one_time",time_afterTv[0].getText());
-        outState.putCharSequence("after_one_htol",temperature_afterTv[0].getText());
-        outState.putCharSequence("after_two_climate",temperature_afterTv[1].getText());
-        outState.putCharSequence("after_two_time",time_afterTv[1].getText());
-        outState.putCharSequence("after_two_htol",temperature_afterTv[1].getText());
-        outState.putCharSequence("after_three_climate",climate_afterTv[2].getText());
-        outState.putCharSequence("after_three_time",time_afterTv[2].getText());
-        outState.putCharSequence("after_three_htol",temperature_afterTv[2].getText());
+        outState.putCharSequence("after_one_climate", climate_afterTv[0].getText());
+        outState.putCharSequence("after_one_time", time_afterTv[0].getText());
+        outState.putCharSequence("after_one_htol", temperature_afterTv[0].getText());
+        outState.putCharSequence("after_two_climate", temperature_afterTv[1].getText());
+        outState.putCharSequence("after_two_time", time_afterTv[1].getText());
+        outState.putCharSequence("after_two_htol", temperature_afterTv[1].getText());
+        outState.putCharSequence("after_three_climate", climate_afterTv[2].getText());
+        outState.putCharSequence("after_three_time", time_afterTv[2].getText());
+        outState.putCharSequence("after_three_htol", temperature_afterTv[2].getText());
         outState.putCharSequence("current_wendu", temperature_now_Tv.getText());
         outState.putCharSequence("current_wind", windTv.getText());
         outState.putCharSequence("current_htol", temperatureTv.getText());
@@ -175,11 +350,13 @@ public class weather extends Activity implements View.OnClickListener {
 
     protected void onStart() {
         super.onStart();
+        // ATTENTION: This was auto-generated to implement the App Indexing API.
+        // See https://g.co/AppIndexing/AndroidStudio for more information.
         Receiver = new MainReceiver() {
             public void onReceive(Context context, Intent intent) {
                 String citycode = intent.getStringExtra("city_name");
                 queryWeatherCode(citycode);
-               queryAfterWeather(citycode);
+                queryAfterWeather(citycode);
                 Log.d("query", "1");
             }
         };
@@ -202,7 +379,6 @@ public class weather extends Activity implements View.OnClickListener {
 
     protected void onStop() {
         super.onStop();
-        Log.d("myWeather", "main_activity stop");
     }
 
     protected void onDestroy() {
@@ -231,7 +407,7 @@ public class weather extends Activity implements View.OnClickListener {
 //                    update_flag=0;
 //                };
 //            }.start();
-            rotate=AnimationUtils.loadAnimation(this,R.anim.animate);
+            rotate = AnimationUtils.loadAnimation(this, R.anim.animate);
             mUpdateBtn.startAnimation(rotate);
             SharedPreferences sharedPreferences = getSharedPreferences("config", MODE_PRIVATE);
             String cityCode = sharedPreferences.getString("main_city_code", "101010100");
@@ -255,6 +431,7 @@ public class weather extends Activity implements View.OnClickListener {
             Log.d("myWeather", cityCode);
             if (NetUtil.getNetworkState(this) != NetUtil.NETWORN_NONE) {
                 Log.d("myWeather", "网络OK");
+
                 queryWeatherCode(cityCode);
                 queryAfterWeather(cityCode);
             } else {
@@ -306,6 +483,7 @@ public class weather extends Activity implements View.OnClickListener {
             }
         }).start();
     }
+
     private void queryAfterWeather(String cityCode) {
         address = "http://wthrcdn.etouch.cn/WeatherApi?citykey=" + cityCode;
         Log.d("myWeather", address);
@@ -315,7 +493,7 @@ public class weather extends Activity implements View.OnClickListener {
                 HttpURLConnection con = null;
                 try {
                     URL url = new URL(address);
-                    List<AfterWeather> afterWeathers =null;
+                    List<AfterWeather> afterWeathers = null;
                     con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
                     con.setConnectTimeout(8000);
@@ -329,11 +507,11 @@ public class weather extends Activity implements View.OnClickListener {
                     }
                     String responseStr = response.toString();
 //                    Log.d("myWeather", responseStr);
-                    afterWeathers=parseXML2(responseStr);
-                    AfterWeatherlist afterWeatherlist=new AfterWeatherlist(afterWeathers);
-                    Log.d("myType",afterWeathers.get(0).getType());
-                    if (afterWeathers!= null) {
-                        Log.d("myWeather2","d");
+                    afterWeathers = parseXML2(responseStr);
+                    AfterWeatherlist afterWeatherlist = new AfterWeatherlist(afterWeathers);
+                    Log.d("myType", afterWeathers.get(0).getType());
+                    if (afterWeathers != null) {
+                        Log.d("myWeather2", "d");
                         Message msg = new Message();
                         msg.what = UPDATE_AFTER_WEATHER;
                         msg.obj = afterWeatherlist;
@@ -349,16 +527,18 @@ public class weather extends Activity implements View.OnClickListener {
         }).start();
     }
 
-    public class AfterWeatherlist{
+    public class AfterWeatherlist {
         List<AfterWeather> afterweathers;
-        private AfterWeatherlist(List<AfterWeather> afterWeathers){
-                   afterweathers=afterWeathers;
+
+        private AfterWeatherlist(List<AfterWeather> afterWeathers) {
+            afterweathers = afterWeathers;
         }
     }
-    private List<AfterWeather> parseXML2(String xmldata){
-        List<AfterWeather> afterWeathers=null;
 
-        AfterWeather afterWeather=null;
+    private List<AfterWeather> parseXML2(String xmldata) {
+        List<AfterWeather> afterWeathers = null;
+
+        AfterWeather afterWeather = null;
         try {
             XmlPullParserFactory fac = XmlPullParserFactory.newInstance();
             XmlPullParser xmlPullParser = fac.newPullParser();
@@ -371,26 +551,27 @@ public class weather extends Activity implements View.OnClickListener {
                         break;
                     case XmlPullParser.START_TAG:
                         if (xmlPullParser.getName().equals("resp")) {
-                            afterWeathers=new ArrayList<AfterWeather>();
+                            afterWeathers = new ArrayList<AfterWeather>();
                             Log.d("myWeather", "parseXML21");
 
-                        } if (xmlPullParser.getName().equals("weather")) {
-                        afterWeather=new AfterWeather();
-                        eventType = xmlPullParser.next();
-                        Log.d("myWeather", "parseXML21");
-                    }
-                        if (afterWeather!= null) {
-                            if (xmlPullParser.getName().equals("high") ) {
+                        }
+                        if (xmlPullParser.getName().equals("weather")) {
+                            afterWeather = new AfterWeather();
+                            eventType = xmlPullParser.next();
+                            Log.d("myWeather", "parseXML21");
+                        }
+                        if (afterWeather != null) {
+                            if (xmlPullParser.getName().equals("high")) {
                                 eventType = xmlPullParser.next();
                                 afterWeather.setHigh(xmlPullParser.getText().substring(2).trim());
-                            } else if (xmlPullParser.getName().equals("low") ) {
+                            } else if (xmlPullParser.getName().equals("low")) {
                                 eventType = xmlPullParser.next();
                                 afterWeather.setLow(xmlPullParser.getText().substring(2).trim());
-                            } else if (xmlPullParser.getName().equals("date")){
+                            } else if (xmlPullParser.getName().equals("date")) {
                                 Log.d("myWeather", "parseXML21");
                                 eventType = xmlPullParser.next();
                                 afterWeather.setDate(xmlPullParser.getText());
-                            }else if (xmlPullParser.getName().equals("type") ) {
+                            } else if (xmlPullParser.getName().equals("type")) {
                                 eventType = xmlPullParser.next();
                                 afterWeather.setType(xmlPullParser.getText());
                                 afterWeather.setWeatherImg(Weather_show(xmlPullParser.getText()));
@@ -398,9 +579,9 @@ public class weather extends Activity implements View.OnClickListener {
                         }
                         break;
                     case XmlPullParser.END_TAG:
-                        if(xmlPullParser.getName().equals("weather")){
+                        if (xmlPullParser.getName().equals("weather")) {
                             afterWeathers.add(afterWeather);
-                            afterWeather=null;
+                            afterWeather = null;
                         }
                         break;
                 }
@@ -413,6 +594,7 @@ public class weather extends Activity implements View.OnClickListener {
         }
         return afterWeathers;
     }
+
     private TodayWeather parseXML(String xmldata) {
         TodayWeather todayWeather = null;
         int fengxiangCount = 0;
@@ -498,27 +680,27 @@ public class weather extends Activity implements View.OnClickListener {
     }
 
     void initView(Bundle savedInstanceState) {
-        climate_afterTv[0]=(TextView)findViewById(R.id.climate_after_one) ;
-        time_afterTv[0]=(TextView)findViewById(R.id.one_after_today);
-        temperature_afterTv[0]=(TextView)findViewById(R.id.temperature_after_one);
-        weather_afterImg[0]=(ImageView)findViewById(R.id.weather_img_one);
+        climate_afterTv[0] = (TextView) findViewById(R.id.climate_after_one);
+        time_afterTv[0] = (TextView) findViewById(R.id.one_after_today);
+        temperature_afterTv[0] = (TextView) findViewById(R.id.temperature_after_one);
+        weather_afterImg[0] = (ImageView) findViewById(R.id.weather_img_one);
 
-        climate_afterTv[1]=(TextView)findViewById(R.id.climate_after_two) ;
-        time_afterTv[1]=(TextView)findViewById(R.id.two_after_today);
-        temperature_afterTv[1]=(TextView)findViewById(R.id.temperature_after_two);
-        weather_afterImg[1]=(ImageView)findViewById(R.id.weather_img_two);
+        climate_afterTv[1] = (TextView) findViewById(R.id.climate_after_two);
+        time_afterTv[1] = (TextView) findViewById(R.id.two_after_today);
+        temperature_afterTv[1] = (TextView) findViewById(R.id.temperature_after_two);
+        weather_afterImg[1] = (ImageView) findViewById(R.id.weather_img_two);
 
-        climate_afterTv[2]=(TextView)findViewById(R.id.climate_after_three) ;
-        time_afterTv[2]=(TextView)findViewById(R.id.three_after_today);
-        temperature_afterTv[2]=(TextView)findViewById(R.id.temperature_after_three);
-        weather_afterImg[2]=(ImageView)findViewById(R.id.weather_img_three);
+        climate_afterTv[2] = (TextView) findViewById(R.id.climate_after_three);
+        time_afterTv[2] = (TextView) findViewById(R.id.three_after_today);
+        temperature_afterTv[2] = (TextView) findViewById(R.id.temperature_after_three);
+        weather_afterImg[2] = (ImageView) findViewById(R.id.weather_img_three);
 
         if (savedInstanceState != null && savedInstanceState.getCharSequence("after_one_climate") != null) {
             climate_afterTv[0].setText(savedInstanceState.getCharSequence("after_one_climate"));
-           weather_afterImg[0].setImageResource(Weather_show((String)savedInstanceState.getCharSequence("after_one_climate")));
+            weather_afterImg[0].setImageResource(Weather_show((String) savedInstanceState.getCharSequence("after_one_climate")));
         } else {
             climate_afterTv[0].setText("N/A");
-          weather_afterImg[0].setImageResource(R.drawable.biz_plugin_weather_qing);
+            weather_afterImg[0].setImageResource(R.drawable.biz_plugin_weather_qing);
 
         }
         if (savedInstanceState != null && savedInstanceState.getCharSequence("after_one_time") != null) {
@@ -532,12 +714,12 @@ public class weather extends Activity implements View.OnClickListener {
         } else {
             temperature_afterTv[0].setText("N/A");
         }
-       if (savedInstanceState != null && savedInstanceState.getCharSequence("after_two_climate") != null) {
+        if (savedInstanceState != null && savedInstanceState.getCharSequence("after_two_climate") != null) {
             climate_afterTv[1].setText(savedInstanceState.getCharSequence("after_two_climate"));
-            weather_afterImg[1].setImageResource(Weather_show((String)savedInstanceState.getCharSequence("after_two_climate")));
+            weather_afterImg[1].setImageResource(Weather_show((String) savedInstanceState.getCharSequence("after_two_climate")));
         } else {
             climate_afterTv[1].setText("N/A");
-          weather_afterImg[1].setImageResource(R.drawable.biz_plugin_weather_qing);
+            weather_afterImg[1].setImageResource(R.drawable.biz_plugin_weather_qing);
         }
         if (savedInstanceState != null && savedInstanceState.getCharSequence("after_two_time") != null) {
             time_afterTv[1].setText(savedInstanceState.getCharSequence("after_two_time"));
@@ -551,7 +733,7 @@ public class weather extends Activity implements View.OnClickListener {
         }
         if (savedInstanceState != null && savedInstanceState.getCharSequence("after_three_climate") != null) {
             climate_afterTv[2].setText(savedInstanceState.getCharSequence("after_three_climate"));
-            weather_afterImg[2].setImageResource(Weather_show((String)savedInstanceState.getCharSequence("after_three_climate")));
+            weather_afterImg[2].setImageResource(Weather_show((String) savedInstanceState.getCharSequence("after_three_climate")));
         } else {
             climate_afterTv[2].setText("N/A");
             weather_afterImg[2].setImageResource(R.drawable.biz_plugin_weather_qing);
@@ -671,10 +853,11 @@ public class weather extends Activity implements View.OnClickListener {
         this.set_wDrawable(todayWeather.getWeatherImg());
         Toast.makeText(weather.this, "更新成功！", Toast.LENGTH_SHORT).show();
     }
+
     void updateAfterWeather(AfterWeatherlist afterWeathers) {
         int j;
-        for(int i=1;i<4;i++){
-            j=i-1;
+        for (int i = 1; i < 4; i++) {
+            j = i - 1;
             climate_afterTv[j].setText(afterWeathers.afterweathers.get(i).getType());
             temperature_afterTv[j].setText(afterWeathers.afterweathers.get(i).getHigh() + "~" + afterWeathers.afterweathers.get(i).getLow());
             weather_afterImg[j].setImageResource(Weather_show(afterWeathers.afterweathers.get(i).getType()));

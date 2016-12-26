@@ -43,7 +43,7 @@
             android:id="@+id/search_text_one"
             android:layout_width="fill_parent"
             android:layout_height="match_parent"
-            android:hint="请输入城市名称"
+            android:hint="请输入城市名称(拼音)"
             android:layout_margin="5dip"
             android:drawablePadding="8.0dip"
             android:paddingBottom="8.0dip"
@@ -62,8 +62,33 @@
         android:layout_below="@id/city_search_one"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <!--<TextView-->
+            <!--android:id="@+id/history"-->
+            <!--android:layout_width="fill_parent"-->
+            <!--android:layout_height="25dip"-->
+            <!--android:background="#26cd7f"-->
+            <!--android:gravity="bottom"-->
+            <!--android:text="历史搜索"-->
+            <!--android:textColor="#554343"-->
+            <!--android:textSize="15.0dip" />-->
+        <!--<GridView-->
+            <!--android:id="@+id/listViewBasic_one"-->
+            <!--android:layout_below="@+id/history"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content">-->
+        <!--</GridView>-->
+        <TextView
+            android:id="@+id/all_city"
+            android:layout_width="fill_parent"
+            android:layout_height="25dip"
+            android:background="#26cd7f"
+            android:gravity="bottom"
+            android:text="全国城市"
+            android:textColor="#554343"
+            android:textSize="15.0dip" />
         <ListView
-            android:id="@+id/listViewBasic_one"
+            android:id="@+id/listViewBasic_two"
+            android:layout_below="@+id/all_city"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </ListView>

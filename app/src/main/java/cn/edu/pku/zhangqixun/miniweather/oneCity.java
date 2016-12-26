@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -29,13 +30,16 @@ import cn.edu.pku.zhangqixun.bean.TodayWeather;
  * Created by JOE on 2016/11/1.
  */
 public class oneCity extends Activity implements View.OnClickListener,AdapterView.OnItemClickListener{
-    private ListView ListViewBasic=null;
+    private GridView ListViewBasic_one=null;
+    private ListView ListViewBasic_two=null;
     private TextView current_city;
     private ImageView mBackBtn;
     private List<City> CityList;;
     private MyApplication app;
-    private ArrayList<String> listViewData;
-    private ArrayList<String> listViewnum;
+    private ArrayList<String> listViewData_one;
+    private ArrayList<String> listViewnum_one;
+    private ArrayList<String> listViewData_two;
+    private ArrayList<String> listViewnum_two;
     private EditText mEditText;
     private static final int SEARCH_TRUE=1;
     private Handler mHandler = new Handler() {
@@ -88,8 +92,14 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
             initListView(city_name);
             mBackBtn=(ImageView)findViewById(R.id.title_back_one);
             mBackBtn.setOnClickListener(this);
-            ListViewBasic=(ListView)findViewById(R.id.listViewBasic_one);
-            ListViewBasic.setOnItemClickListener(this);
+            ListViewBasic_two=(ListView)findViewById(R.id.listViewBasic_two);
+            ListViewBasic_two.setOnItemClickListener(this);
+//            ListViewBasic_one=(GridView)findViewById(R.id.listViewBasic_one);
+//            ListViewBasic_one.setOnItemClickListener(this);
+//            listViewData_one=new ArrayList<String>();
+//            listViewData_one.add("hhh");
+//            listViewData_one.add("xxx");
+//            ListViewBasic_one.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData_one));
             mEditText=(EditText)findViewById(R.id.search_text_one);
             mEditText.addTextChangedListener(mTextWatcher);
         }
@@ -108,23 +118,23 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Intent i = new Intent();
         i.setAction("receive_city");
-       i.putExtra("city_name", listViewnum.get(position));
-        Log.d("myWeather", listViewnum.get(position));
+       i.putExtra("city_name", listViewnum_two.get(position));
+        Log.d("myWeather", listViewnum_two.get(position));
        sendBroadcast(i);
         getApplication();
         getApplicationContext();
         finish();
     }
     private void queryListView(){
-        ListViewBasic=(ListView)super.findViewById(R.id.listViewBasic_one);
-        ListViewBasic.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData));
+        ListViewBasic_two=(ListView)super.findViewById(R.id.listViewBasic_two);
+        ListViewBasic_two.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData_two));
     }
     private  void queryCity(final CharSequence candidate){
         new Thread(new Runnable() {
             @Override
             public void run() {
-                listViewnum.clear();
-                listViewData.clear();
+                listViewnum_two.clear();
+                listViewData_two.clear();
                 StringBuffer sb = new StringBuffer();
                 if(candidate!=null){
                     for(int i=0;i<candidate.length();i++){
@@ -141,8 +151,8 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
                 for (int i= 0;i<CityList.size();i++){
                     if(CityList.get(i).getAllPY().contains(can)||CityList.get(i).getCity().contains(can))
                     {
-                        listViewData.add(CityList.get(i).getCity());
-                        listViewnum.add(CityList.get(i).getNumber());
+                        listViewData_two.add(CityList.get(i).getCity());
+                        listViewnum_two.add(CityList.get(i).getNumber());
                     }
                     else {
                         continue;
@@ -157,19 +167,20 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
     private void initListView(String city_name){
         current_city=(TextView) findViewById(R.id.title_name_one);
         current_city.setText("当前城市："+city_name);
-       listViewData=new ArrayList<String>();
-        listViewnum=new ArrayList<String>();
+       listViewData_two=new ArrayList<String>();
+        listViewnum_two=new ArrayList<String>();
         app=(MyApplication)getApplication();
         CityList=app.getCityList();
        /* for (int i= 0;i<CityList.size();i++){
             listViewData.add(CityList.get(i).getCity());
         }*/
         for (int i= 0;i<CityList.size();i++){
-                listViewData.add(CityList.get(i).getCity());
-                listViewnum.add(CityList.get(i).getNumber());
+                listViewData_two.add(CityList.get(i).getCity());
+                listViewnum_two.add(CityList.get(i).getNumber());
 
         }
-        ListViewBasic=(ListView)super.findViewById(R.id.listViewBasic_one);
-        ListViewBasic.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData));
+        ListViewBasic_two=(ListView)super.findViewById(R.id.listViewBasic_two);
+        ListViewBasic_two.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData_two));
+
     }
 }
