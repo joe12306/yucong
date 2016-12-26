@@ -1,8 +1,11 @@
 package cn.edu.pku.zhangqixun.miniweather;
 
 import android.app.Activity;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -12,8 +15,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -24,14 +27,16 @@ import java.util.List;
 
 import cn.edu.pku.zhangqixun.app.MyApplication;
 import cn.edu.pku.zhangqixun.bean.City;
-import cn.edu.pku.zhangqixun.bean.TodayWeather;
+import cn.edu.pku.zhangqixun.bean.History;
+import cn.edu.pku.zhangqixun.bean.Person;
 
 /**
  * Created by JOE on 2016/11/1.
  */
 public class oneCity extends Activity implements View.OnClickListener,AdapterView.OnItemClickListener{
-    private GridView ListViewBasic_one=null;
+    private ListView ListViewBasic_one=null;
     private ListView ListViewBasic_two=null;
+    private Button histoy_clear;
     private TextView current_city;
     private ImageView mBackBtn;
     private List<City> CityList;;
@@ -42,6 +47,7 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
     private ArrayList<String> listViewnum_two;
     private EditText mEditText;
     private static final int SEARCH_TRUE=1;
+    private static final int UPDATE_HISTORY = 2;
     private Handler mHandler = new Handler() {
         public void handleMessage(Message msg) {
 
@@ -49,6 +55,8 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
                 case SEARCH_TRUE:
                     queryListView();
                     break;
+                case UPDATE_HISTORY:
+                    queryListhistory();
                 default:
                     break;
             }
@@ -92,17 +100,56 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
             initListView(city_name);
             mBackBtn=(ImageView)findViewById(R.id.title_back_one);
             mBackBtn.setOnClickListener(this);
+            ListViewBasic_one=(ListView)findViewById(R.id.listViewBasic_one);
+            ListViewBasic_one.setOnItemClickListener(this);
             ListViewBasic_two=(ListView)findViewById(R.id.listViewBasic_two);
             ListViewBasic_two.setOnItemClickListener(this);
 //            ListViewBasic_one=(GridView)findViewById(R.id.listViewBasic_one);
 //            ListViewBasic_one.setOnItemClickListener(this);
-//            listViewData_one=new ArrayList<String>();
+            listViewData_one=new ArrayList<String>();
+            listViewnum_one=new ArrayList<String>();
 //            listViewData_one.add("hhh");
 //            listViewData_one.add("xxx");
-//            ListViewBasic_one.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData_one));
+
+            histoy_clear=(Button)findViewById(R.id.button);
+            histoy_clear.setOnClickListener(this);
             mEditText=(EditText)findViewById(R.id.search_text_one);
             mEditText.addTextChangedListener(mTextWatcher);
+            inithistory();
+
         }
+    private void inithistory(){
+        //打开或创建test.db数据库
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                SQLiteDatabase db = openOrCreateDatabase("history.db", Context.MODE_PRIVATE, null);
+                //创建person表
+                db.execSQL("CREATE TABLE IF NOT EXISTS history(_id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, number VARCHAR) ");
+                Cursor c = db.rawQuery("SELECT * from history",null);
+                while (c.moveToNext()){
+                    String name = c.getString(c.getColumnIndex("name"));
+                    Log.d("mycity", name);
+                    String number= c.getString(c.getColumnIndex("number"));
+                    Log.d("mycity", number);
+                    listViewData_one.add(name);
+                    listViewnum_one.add(number);
+                }
+                //关闭当前数据库
+                db.close();
+                Message msg = new Message();
+                msg.what = UPDATE_HISTORY;
+                mHandler.sendMessage(msg);
+            }
+        }
+
+        ).start();
+
+
+
+        //删除test.db数据库
+
+    }
     public void onClick(View v)
     {
         switch (v.getId())
@@ -110,20 +157,67 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
             case R.id.title_back_one:
                 finish();
                 break;
+            case R.id.button:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        deleteDatabase("history.db");
+                        listViewData_one.clear();
+                        listViewnum_one.clear();
+                        Message msg = new Message();
+                        msg.what = UPDATE_HISTORY;
+                        mHandler.sendMessage(msg);
+                    }
+                }
+
+                ).start();
+                break;
             default:
                 break;
 
         }
     }
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        Intent i = new Intent();
-        i.setAction("receive_city");
-       i.putExtra("city_name", listViewnum_two.get(position));
-        Log.d("myWeather", listViewnum_two.get(position));
-       sendBroadcast(i);
-        getApplication();
-        getApplicationContext();
-        finish();
+        switch(parent.getId()){
+            case R.id.listViewBasic_one:
+                Intent i = new Intent();
+                i.setAction("receive_city");
+                i.putExtra("city_name", listViewnum_one.get(position));
+                Log.d("mycity", listViewnum_one.get(position));
+                sendBroadcast(i);
+                getApplication();
+                getApplicationContext();
+                finish();
+                break;
+            case  R.id.listViewBasic_two:
+                Intent j = new Intent();
+                j.setAction("receive_city");
+                j.putExtra("city_name", listViewnum_two.get(position));
+                Log.d("myWeather", listViewnum_two.get(position));
+                SQLiteDatabase db = openOrCreateDatabase("history.db", Context.MODE_PRIVATE, null);
+                db.execSQL("CREATE TABLE IF NOT EXISTS history(_id INTEGER PRIMARY KEY AUTOINCREMENT, name VARCHAR, number VARCHAR) ");
+                Cursor c = db.rawQuery("SELECT * FROM history WHERE name = ? ",new String[]{listViewData_two.get(position)});
+                if(c.moveToNext()){
+                }
+                else{
+                    db.execSQL("INSERT INTO history VALUES (NULL, ?, ?)",new Object[]{listViewData_two.get(position),listViewnum_two.get(position)});
+                }
+                db.close();
+                sendBroadcast(j);
+                getApplication();
+                getApplicationContext();
+                finish();
+                break;
+            default:
+                break;
+
+        }
+
+
+    }
+    private void queryListhistory(){
+        ListViewBasic_one=(ListView)super.findViewById(R.id.listViewBasic_one);
+        ListViewBasic_one.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData_one));
     }
     private void queryListView(){
         ListViewBasic_two=(ListView)super.findViewById(R.id.listViewBasic_two);
@@ -165,6 +259,7 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
         }).start();
     }
     private void initListView(String city_name){
+
         current_city=(TextView) findViewById(R.id.title_name_one);
         current_city.setText("当前城市："+city_name);
        listViewData_two=new ArrayList<String>();
@@ -182,5 +277,9 @@ public class oneCity extends Activity implements View.OnClickListener,AdapterVie
         ListViewBasic_two=(ListView)super.findViewById(R.id.listViewBasic_two);
         ListViewBasic_two.setAdapter(new ArrayAdapter<String>(this,android.R.layout.simple_expandable_list_item_1,listViewData_two));
 
+
+
+
     }
+
 }

@@ -62,23 +62,47 @@
         android:layout_below="@id/city_search_one"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <!--<TextView-->
-            <!--android:id="@+id/history"-->
-            <!--android:layout_width="fill_parent"-->
-            <!--android:layout_height="25dip"-->
-            <!--android:background="#26cd7f"-->
-            <!--android:gravity="bottom"-->
-            <!--android:text="历史搜索"-->
-            <!--android:textColor="#554343"-->
-            <!--android:textSize="15.0dip" />-->
-        <!--<GridView-->
-            <!--android:id="@+id/listViewBasic_one"-->
-            <!--android:layout_below="@+id/history"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content">-->
-        <!--</GridView>-->
+        <RelativeLayout
+            android:id="@+id/history_title"
+            android:layout_width="match_parent"
+            android:layout_height="40dip">
+        <TextView
+            android:id="@+id/history"
+            android:layout_width="fill_parent"
+            android:layout_height="40dip"
+            android:background="#26cd7f"
+            android:gravity="bottom"
+            android:text="历史搜索"
+            android:textColor="#554343"
+            android:textSize="15.0dip" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="清空"
+                android:gravity="bottom"
+                android:id="@+id/button"
+                android:layout_centerVertical="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"/>
+
+        </RelativeLayout>
+        <ListView
+            android:id="@+id/listViewBasic_one"
+            android:layout_below="@+id/history_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </ListView>
+        <TextView
+            android:id="@+id/blank"
+            android:layout_below="@+id/listViewBasic_one"
+            android:layout_width="fill_parent"
+            android:layout_height="25dip"
+            />
         <TextView
             android:id="@+id/all_city"
+            android:layout_below="@+id/blank"
             android:layout_width="fill_parent"
             android:layout_height="25dip"
             android:background="#26cd7f"
@@ -92,6 +116,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
         </ListView>
+
     </RelativeLayout>
 
 </RelativeLayout>
